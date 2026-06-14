@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { userController } from '../controllers/user.controller';
 import { authenticate, requireRole } from '../middleware/auth.middleware';
 import { validate, registerSchema, loginSchema, updateUserSchema } from '../middleware/validation.middleware';
+import imagekitRoutes from "./imagekit.routes";
 
 const router = Router();
 
@@ -17,5 +18,8 @@ router.patch('/users/:id',   authenticate, validate(updateUserSchema), (req, res
 router.get('/users',         authenticate, requireRole('admin'), (req, res) => userController.getAll(req, res));
 router.get('/users/:id',     authenticate, requireRole('admin'), (req, res) => userController.getById(req, res));
 router.delete('/users/:id',  authenticate, requireRole('admin'), (req, res) => userController.delete(req, res));
+
+// ── Images (ImageKit) ──────────────────────────────────────────
+router.use('/images', imagekitRoutes);
 
 export default router;
