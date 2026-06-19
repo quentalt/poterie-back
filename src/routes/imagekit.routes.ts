@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { imagekitController } from '../controllers/imagekit.controller';
-import { authenticate, requireRole } from '../middleware/auth.middleware';
+import { authenticate } from '../middleware/auth.middleware';
 import { upload } from '../middleware/upload.middleware';
 
 const router = Router();
@@ -23,9 +23,7 @@ router.get('/', (req, res) => imagekitController.list(req, res));
 // ── Upload serveur (admin / modérateur) ───────────────────────
 // POST /images/upload  multipart/form-data  champ: image
 router.post(
-  '/upload',
-  requireRole('admin', 'moderator'),
-  upload.single('image'),
+  '/upload', upload.single('image'),
   (req, res) => imagekitController.upload(req, res)
 );
 
@@ -36,17 +34,13 @@ router.get('/:fileId', (req, res) => imagekitController.getById(req, res));
 // ── Suppression unitaire (admin uniquement) ───────────────────
 // DELETE /images/:fileId
 router.delete(
-  '/:fileId',
-  requireRole('admin'),
-  (req, res) => imagekitController.delete(req, res)
+  '/:fileId', (req, res) => imagekitController.delete(req, res)
 );
 
 // ── Suppression en masse (admin uniquement) ───────────────────
 // DELETE /images  body: { fileIds: ["id1", "id2"] }
 router.delete(
-  '/',
-  requireRole('admin'),
-  (req, res) => imagekitController.bulkDelete(req, res)
+  '/', (req, res) => imagekitController.bulkDelete(req, res)
 );
 
 export default router;
