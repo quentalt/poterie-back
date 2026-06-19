@@ -101,6 +101,23 @@ export class UserController {
       res.status(404).json({error: message});
     }
   }
+
+  async deleteSelf(req: Request, res: Response): Promise<void> {
+    try {
+      const { password } = req.body as { password?: string };
+      if (!password) {
+        res.status(400).json({ error: 'Le mot de passe est requis pour confirmer la suppression' });
+        return;
+      }
+
+      await userService.deleteSelf(req.user!.userId, password);
+      res.status(204).send();
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Erreur interne';
+      const status = message.includes('incorrect') ? 401 : 400;
+      res.status(status).json({ error: message });
+    }
+  }
 }
 
 export const userController = new UserController();

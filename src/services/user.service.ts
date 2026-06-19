@@ -35,10 +35,10 @@ export class UserService {
     }
 
     const password_hash = await bcrypt.hash(dto.password, SALT_ROUNDS);
-    const user = await userRepository.create({ ...dto, password_hash });
+    const user = await userRepository.create({...dto, password_hash});
 
     const token = this.generateToken(user);
-    return { user: toPublic(user), token };
+    return {user: toPublic(user), token};
   }
 
   // Connexion
@@ -57,13 +57,13 @@ export class UserService {
     }
 
     const token = this.generateToken(user);
-    return { user: toPublic(user), token };
+    return {user: toPublic(user), token};
   }
 
   // Récupère tous les utilisateurs (admin)
   async getAll(params: PaginationParams): Promise<PaginatedResult<UserPublic>> {
     const result = await userRepository.findAll(params);
-    return { ...result, data: result.data.map(toPublic) };
+    return {...result, data: result.data.map(toPublic)};
   }
 
   // Récupère un utilisateur par ID
@@ -92,7 +92,7 @@ export class UserService {
       throw new Error('Ce nom d\'utilisateur est déjà pris');
     }
 
-    const updateData: UpdateUserDto & { password_hash?: string } = { ...dto };
+    const updateData: UpdateUserDto & { password_hash?: string } = {...dto};
     if (dto.password) {
       updateData.password_hash = await bcrypt.hash(dto.password, SALT_ROUNDS);
       delete updateData.password;
@@ -116,12 +116,22 @@ export class UserService {
       email: user.email,
       role: user.role,
     };
-    return jwt.sign(payload, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN } as jwt.SignOptions);
+    return jwt.sign(payload, JWT_SECRET, {expiresIn: JWT_EXPIRES_IN} as jwt.SignOptions);
   }
 
   // Vérifie un JWT
   static verifyToken(token: string): AuthPayload {
     return jwt.verify(token, JWT_SECRET) as AuthPayload;
+  }
+
+  async deleteSelf(id: number, password: string): Promise<void> {
+    const user = await userRepository.findById(id);
+    if (!user) throw new Error('Utilisateur introuvable');
+
+    const isValid = await bcrypt.compare(password, user.password_hash);
+    if (!isValid) throw new Error('Mot de passe incorrect');
+
+    await userRepository.delete(id);
   }
 }
 
