@@ -12,7 +12,7 @@ router.post('/auth/login',    validate(loginSchema),    (req, res) => userContro
 
 // ── Utilisateur connecté ───────────────────────────────────────
 router.get('/users/me',      authenticate, (req, res) => userController.getMe(req, res));
-router.delete('/users/me',   authenticate, (req, res) => userController.deleteSelf(req, res));
+router.delete('/me', authenticate, (req, res) => userController.deleteSelf(req, res));
 router.patch('/users/:id',   authenticate, validate(updateUserSchema), (req, res) => userController.update(req, res));
 
 // ── Admin uniquement ───────────────────────────────────────────
