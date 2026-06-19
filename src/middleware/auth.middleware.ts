@@ -31,6 +31,7 @@ export function authenticate(req: Request, res: Response, next: NextFunction): v
 }
 
 // Middleware de restriction par rôle
+/*
 export function requireRole(...roles: UserRole[]) {
   return (req: Request, res: Response, next: NextFunction): void => {
     if (!req.user) {
@@ -44,3 +45,4 @@ export function requireRole(...roles: UserRole[]) {
     next();
   };
 }
+*/
