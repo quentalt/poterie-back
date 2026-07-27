@@ -73,6 +73,15 @@ export class UserRepository {
     return rows[0] as User;
   }
 
+  async updatePassword(id: number, password_hash: string): Promise<User | null> {
+    await sql`
+      UPDATE users
+      SET password_hash = ${password_hash}, updated_at = NOW()
+      WHERE id = ${id}
+    `;
+    return this.findById(id);
+  }
+
   // Met à jour un utilisateur
   async update(id: number, dto: UpdateUserDto & { password_hash?: string }): Promise<User | null> {
     // On utilise des requêtes conditionnelles en série pour éviter sql.unsafe

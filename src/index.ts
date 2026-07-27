@@ -1,8 +1,10 @@
 import express from 'express';
 import cors from 'cors';
 import * as dotenv from 'dotenv';
+import swaggerUi from 'swagger-ui-express';
 import { testConnection } from './config/database';
 import routes from './routes';
+import { swaggerSpec } from './config/swagger';
 
 dotenv.config();
 
@@ -18,6 +20,9 @@ app.use(express.urlencoded({ extended: true }));
 app.get('/health', (_req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
+
+// ── Swagger ───────────────────────────────────────────────────
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 // ── API Routes ─────────────────────────────────────────────────
 app.use('/api/v1', routes);

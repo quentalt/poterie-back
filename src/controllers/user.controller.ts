@@ -1,8 +1,10 @@
 import type { Request, Response } from 'express';
 import { userService } from '../services/user.service';
+import { passwordResetService } from '../services/password-reset.service';
 
 export class UserController {
   // POST /auth/register
+  
   async register(req: Request, res: Response): Promise<void> {
     try {
       const result = await userService.register(req.body);
@@ -23,6 +25,48 @@ export class UserController {
       res.status(401).json({error: message});
     }
   }
+
+  async requestReset(req: Request, res: Response): Promise<void> {
+    try {
+      const { email } = req.body as { email?: string };
+      if (!email) {
+        res.status(400).json({ error: 'Email requis' });
+        return;
+      }
+
+      await passwordResetService.requestReset(email);
+
+      // Réponse identique que l'email existe ou non → pas de fuite d'info
+      res.json({
+        message: 'Si cet email est associé à un compte, un code à 6 chiffres a été envoyé.',
+      });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Erreur interne';
+      res.status(500).json({ error: message });
+    }
+  }
+async resetPassword(req: Request, res: Response): Promise<void> {
+    try {
+      const { email, code, password } = req.body as {
+        email?: string;
+        code?: string;
+        password?: string;
+      };
+
+      if (!email || !code || !password) {
+        res.status(400).json({ error: 'email, code et password sont requis' });
+        return;
+      }
+
+      await passwordResetService.resetPassword(email, code, password);
+
+      res.json({ message: 'Mot de passe modifié avec succès. Vous pouvez vous reconnecter.' });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Erreur interne';
+      res.status(400).json({ error: message });
+    }
+  }
+
 
   // GET /users/me
   async getMe(req: Request, res: Response): Promise<void> {

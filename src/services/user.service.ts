@@ -1,12 +1,16 @@
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
+import crypto from 'crypto';
 import { userRepository } from '../repositories/user.repository';
+import { sendPasswordResetEmail } from './mail.service';
 import type {
   User,
   UserPublic,
   CreateUserDto,
   UpdateUserDto,
   LoginDto,
+  ForgotPasswordDto,
+  ResetPasswordDto,
   AuthPayload,
   AuthResponse,
   PaginationParams,
@@ -107,6 +111,50 @@ export class UserService {
   async delete(id: number): Promise<void> {
     const deleted = await userRepository.delete(id);
     if (!deleted) throw new Error('Utilisateur introuvable');
+  }
+
+  async forgotPassword(dto: ForgotPasswordDto): Promise<{ message: string }> {
+    const user = await userRepository.findByEmail(dto.email);
+    if (!user) {
+      return { message: 'Si un compte existe avec cet email, un email de réinitialisation a été envoyé.' };
+    }
+
+    if (!user.is_active) {
+      throw new Error('Ce compte est désactivé');
+    }
+
+    const token = crypto.randomBytes(32).toString('hex');
+    const expiresAt = new Date(Date.now() + 15 * 60 * 1000);
+
+    const resetToken = jwt.sign({ userId: user.id, purpose: 'password-reset' }, JWT_SECRET, { expiresIn: '15m' } as jwt.SignOptions);
+
+    await sendPasswordResetEmail(user.email, resetToken);
+
+    return { message: 'Si un compte existe avec cet email, un email de réinitialisation a été envoyé.' };
+  }
+
+  async resetPassword(dto: ResetPasswordDto): Promise<{ message: string }> {
+    let payload: AuthPayload & { purpose?: string };
+
+    try {
+      payload = jwt.verify(dto.token, JWT_SECRET) as AuthPayload & { purpose?: string };
+    } catch {
+      throw new Error('Token invalide ou expiré');
+    }
+
+    if (payload.purpose !== 'password-reset') {
+      throw new Error('Token invalide');
+    }
+
+    const user = await userRepository.findById(payload.userId);
+    if (!user) {
+      throw new Error('Utilisateur introuvable');
+    }
+
+    const password_hash = await bcrypt.hash(dto.password, SALT_ROUNDS);
+    await userRepository.updatePassword(user.id, password_hash);
+
+    return { message: 'Mot de passe mis à jour avec succès' };
   }
 
   // Génère un JWT
