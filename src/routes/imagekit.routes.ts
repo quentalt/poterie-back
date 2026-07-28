@@ -6,7 +6,6 @@ import { upload } from '../middleware/upload.middleware';
 const router = Router();
 
 // Toutes les routes images nécessitent d'être connecté
-router.use(authenticate);
 
 // ── Authentification (pour upload client-side) ─────────────────
 // GET /images/auth → token + signature (30 min)
@@ -19,6 +18,7 @@ router.get('/url', (req, res) => imagekitController.buildUrl(req, res));
 // ── Listing ───────────────────────────────────────────────────
 // GET /images?folder=products&tags=bol,grès&limit=20&skip=0&search=vase
 router.get('/', (req, res) => imagekitController.list(req, res));
+router.use(authenticate);
 
 // ── Upload serveur (admin / modérateur) ───────────────────────
 // POST /images/upload  multipart/form-data  champ: image
