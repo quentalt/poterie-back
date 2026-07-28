@@ -120,23 +120,22 @@ export class ImageKitService {
   }
 
   // Normalise la réponse ImageKit vers notre type interne
- private normalize(raw: unknown): ImageKitFile {
-  const f = raw as Record<string, unknown>;
-  return {
-    fileId:       String(f['fileId']       ?? f['$id'] ?? ''),
-    name:         String(f['name']         ?? ''),
-    url:          String(f['url']          ?? ''),
-    thumbnailUrl: String(f['thumbnailUrl'] ?? f['url'] ?? ''),
-    filePath:     String(f['filePath']     ?? ''),
-    tags:         Array.isArray(f['tags']) ? (f['tags'] as string[]) : [],
-    size:         Number(f['size']         ?? 0),
-    width:        f['width']  != null ? Number(f['width'])  : null,
-    height:       f['height'] != null ? Number(f['height']) : null,
-    createdAt:    String(f['createdAt']    ?? ''),
-    updatedAt:    String(f['updatedAt']    ?? ''),
-    customMetadata: (f['customMetadata'] as ImageKitFile['customMetadata']) ?? {}, // ← ajout
-  };
-}
+  private normalize(raw: unknown): ImageKitFile {
+    const f = raw as Record<string, unknown>;
+    return {
+      fileId:       String(f['fileId']       ?? f['$id'] ?? ''),
+      name:         String(f['name']         ?? ''),
+      url:          String(f['url']          ?? ''),
+      thumbnailUrl: String(f['thumbnailUrl'] ?? f['url'] ?? ''),
+      filePath:     String(f['filePath']     ?? ''),
+      tags:         Array.isArray(f['tags']) ? (f['tags'] as string[]) : [],
+      size:         Number(f['size']         ?? 0),
+      width:        f['width']  != null ? Number(f['width'])  : null,
+      height:       f['height'] != null ? Number(f['height']) : null,
+      createdAt:    String(f['createdAt']    ?? ''),
+      updatedAt:    String(f['updatedAt']    ?? ''),
+    };
+  }
 }
 
 export const imagekitService = new ImageKitService();
