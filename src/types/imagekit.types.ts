@@ -21,6 +21,13 @@ export interface ImageKitFile {
   height: number | null;
   createdAt: string;
   updatedAt: string;
+  customMetadata?: {          
+    title?: string;
+    category?: string;
+    description?: string;
+    status?: string;
+    groupId?: number;
+  };
 }
 
 export interface ListFilesQuery {
