@@ -19,6 +19,7 @@ export const FOLDERS = {
   products:    '/ogres-de-la-terre/produits',
   collections: '/ogres-de-la-terre/collections',
   atelier:     '/ogres-de-la-terre/atelier',
+    pieces:      '/pieces',
 } as const;
 
 export type FolderKey = keyof typeof FOLDERS;
