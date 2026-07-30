@@ -113,19 +113,21 @@ export class ImageKitService {
     const raw = current as unknown as Record<string, unknown>
     const filePath = String(raw['filePath'] ?? '')
     const currentName = String(raw['name'] ?? '')
+    const existingMeta = (raw['customMetadata'] ?? {}) as Record<string, unknown>
 
-    if (!filePath) throw new Error(`Impossible de retrouver le filePath du fichier ${fileId}`)
+    if (!filePath) throw new Error(`filePath introuvable pour ${fileId}`)
 
-    // Extension réelle du fichier stocké
+    const title = dto.newFileName.trim()
     const ext = currentName.includes('.') ? currentName.split('.').pop()! : 'jpg'
 
-    // Nom sûr : pas d'accents, d'espaces ni de caractères spéciaux
-    const base = dto.newFileName
-        .replace(/\.[^.]+$/, '')                              // retire une extension éventuelle
-        .normalize('NFD').replace(/[\u0300-\u036f]/g, '')      // enlève les accents
-        .replace(/[^a-zA-Z0-9-_]+/g, '-')
-        .replace(/^-+|-+$/g, '')
-        .toLowerCase() || `image-${Date.now()}`
+    const base =
+        title
+            .replace(/\.[^.]+$/, '')
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '')
+            .replace(/[^a-zA-Z0-9-_]+/g, '-')
+            .replace(/^-+|-+$/g, '')
+            .toLowerCase() || `image-${Date.now()}`
 
     await imagekit.renameFile({
       filePath,
@@ -133,9 +135,13 @@ export class ImageKitService {
       purgeCache: dto.purgeCache ?? true,
     })
 
+    // Le titre affiché vient de customMetadata : il doit suivre
+    await imagekit.updateFileDetails(fileId, {
+      customMetadata: { ...existingMeta, title },
+    })
+
     return this.getById(fileId)
   }
-
   /**
    * Génère une URL optimisée avec transformations à la volée.
    * Utile pour les vignettes catalogue ou les images SEO.
