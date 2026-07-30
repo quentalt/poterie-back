@@ -1,6 +1,6 @@
 import type { Request, Response } from 'express';
 import { imagekitService } from '../services/imagekit.service';
-import type { ListFilesQuery, UploadImageDto } from '../types/imagekit.types';
+import type {ListFilesQuery, RenameImageDto, UploadImageDto} from '../types/imagekit.types';
 
 export class ImageKitController {
   /**
@@ -53,6 +53,33 @@ export class ImageKitController {
       res.status(201).json(file);
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Erreur upload';
+      res.status(500).json({ error: message });
+    }
+  }
+
+
+  /**
+   * PATCH /images/:fileId/rename
+   * Renomme un fichier. Body : { newFileName, purgeCache? }
+   */
+  async rename(req: Request, res: Response): Promise<void> {
+    try {
+      const { newFileName, purgeCache } = req.body as Record<string, unknown>;
+
+      if (!newFileName || typeof newFileName !== 'string') {
+        res.status(400).json({ error: 'Le champ newFileName est requis' });
+        return;
+      }
+
+      const dto: RenameImageDto = {
+        newFileName,
+        purgeCache: purgeCache === undefined ? true : Boolean(purgeCache),
+      };
+
+      const file = await imagekitService.rename(String(req.params['fileId']), dto);
+      res.json(file);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Erreur renommage';
       res.status(500).json({ error: message });
     }
   }

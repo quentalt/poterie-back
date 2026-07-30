@@ -3,7 +3,7 @@ import type {
   UploadImageDto,
   ImageKitFile,
   ListFilesQuery,
-  AuthSignature,
+  AuthSignature, RenameImageDto
 } from '../types/imagekit.types';
 
 export class ImageKitService {
@@ -100,6 +100,31 @@ export class ImageKitService {
     });
 
     return { deleted, errors };
+  }
+
+  /**
+   * Renomme un fichier existant (change son nom et son filePath).
+   * Le front ne connaît que le fileId : on va donc chercher le
+   * filePath actuel nous-mêmes avant d'appeler l'API de renommage.
+   * Le fileId reste identique après renommage.
+   */
+  async rename(fileId: string, dto: RenameImageDto): Promise<ImageKitFile> {
+    const current = await imagekit.getFileDetails(fileId);
+    const filePath = String((current as unknown as Record<string, unknown>)['filePath'] ?? '');
+
+    if (!filePath) {
+      throw new Error(`Impossible de retrouver le filePath du fichier ${fileId}`);
+    }
+
+    await imagekit.renameFile({
+      filePath,
+      newFileName: dto.newFileName,
+      purgeCache:  dto.purgeCache ?? true,
+    });
+
+    // Le fileId ne change pas lors d'un renommage : on relit le
+    // fichier pour renvoyer l'état à jour (nouvelle url, filePath, name).
+    return this.getById(fileId);
   }
 
   /**

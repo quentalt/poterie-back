@@ -24,6 +24,13 @@ export interface ImageKitFile {
   customMetadata: Record<string, unknown>;
 }
 
+export interface RenameImageDto {
+  /** Nouveau nom du fichier (avec extension, ex: "vase-bleu.webp") */
+  newFileName: string;
+  /** Purge le cache CDN sur l'ancienne URL (défaut: true) */
+  purgeCache?: boolean;
+}
+
 export interface ListFilesQuery {
   folder?: 'products' | 'collections' | 'atelier';
   tags?: string;          // virgule-séparés ex: "bol,grès"

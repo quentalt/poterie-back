@@ -31,6 +31,11 @@ router.post(
 // GET /images/:fileId
 router.get('/:fileId', (req, res) => imagekitController.getById(req, res));
 
+router.patch(
+    '/:fileId',
+    (req, res) => imagekitController.rename(req, res),
+);
+
 // ── Suppression unitaire (admin uniquement) ───────────────────
 // DELETE /images/:fileId
 router.delete(
