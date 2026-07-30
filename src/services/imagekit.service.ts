@@ -57,15 +57,15 @@ export class ImageKitService {
       limit:       query.limit  ?? 50,
       skip:        query.skip   ?? 0,
       searchQuery: query.searchQuery
-        ? `name : "${query.searchQuery}"`
-        : undefined,
+          ? `name : "${query.searchQuery}"`
+          : undefined,
       fileType: 'image',
       sort: 'DESC_CREATED',
+      includeFolder: false,   // ← déjà probablement là
     });
 
     return (results as unknown[]).map((f) => this.normalize(f));
   }
-
   /**
    * Détail d'un fichier par son fileId.
    */
@@ -122,8 +122,17 @@ export class ImageKitService {
   // Normalise la réponse ImageKit vers notre type interne
   private normalize(raw: unknown): ImageKitFile {
     const f = raw as Record<string, unknown>;
+
+    // ImageKit retourne parfois customMetadata comme string JSON, parfois comme objet
+    let customMetadata: Record<string, unknown> = {};
+    if (typeof f['customMetadata'] === 'string') {
+      try { customMetadata = JSON.parse(f['customMetadata'] as string) } catch { /* */ }
+    } else if (f['customMetadata'] && typeof f['customMetadata'] === 'object') {
+      customMetadata = f['customMetadata'] as Record<string, unknown>;
+    }
+
     return {
-      fileId:       String(f['fileId']       ?? f['$id'] ?? ''),
+      fileId:       String(f['fileId']       ?? ''),
       name:         String(f['name']         ?? ''),
       url:          String(f['url']          ?? ''),
       thumbnailUrl: String(f['thumbnailUrl'] ?? f['url'] ?? ''),
@@ -134,8 +143,8 @@ export class ImageKitService {
       height:       f['height'] != null ? Number(f['height']) : null,
       createdAt:    String(f['createdAt']    ?? ''),
       updatedAt:    String(f['updatedAt']    ?? ''),
+      customMetadata,   // ← ajouter ce champ
     };
-  }
-}
+  }}
 
 export const imagekitService = new ImageKitService();
