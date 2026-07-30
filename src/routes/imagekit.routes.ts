@@ -31,6 +31,7 @@ router.post(
 // GET /images/:fileId
 router.get('/:fileId', (req, res) => imagekitController.getById(req, res));
 
+// ── Renommage fichier
 router.patch(
     '/:fileId',
     (req, res) => imagekitController.rename(req, res),

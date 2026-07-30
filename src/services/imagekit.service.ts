@@ -109,22 +109,31 @@ export class ImageKitService {
    * Le fileId reste identique après renommage.
    */
   async rename(fileId: string, dto: RenameImageDto): Promise<ImageKitFile> {
-    const current = await imagekit.getFileDetails(fileId);
-    const filePath = String((current as unknown as Record<string, unknown>)['filePath'] ?? '');
+    const current = await imagekit.getFileDetails(fileId)
+    const raw = current as unknown as Record<string, unknown>
+    const filePath = String(raw['filePath'] ?? '')
+    const currentName = String(raw['name'] ?? '')
 
-    if (!filePath) {
-      throw new Error(`Impossible de retrouver le filePath du fichier ${fileId}`);
-    }
+    if (!filePath) throw new Error(`Impossible de retrouver le filePath du fichier ${fileId}`)
+
+    // Extension réelle du fichier stocké
+    const ext = currentName.includes('.') ? currentName.split('.').pop()! : 'jpg'
+
+    // Nom sûr : pas d'accents, d'espaces ni de caractères spéciaux
+    const base = dto.newFileName
+        .replace(/\.[^.]+$/, '')                              // retire une extension éventuelle
+        .normalize('NFD').replace(/[\u0300-\u036f]/g, '')      // enlève les accents
+        .replace(/[^a-zA-Z0-9-_]+/g, '-')
+        .replace(/^-+|-+$/g, '')
+        .toLowerCase() || `image-${Date.now()}`
 
     await imagekit.renameFile({
       filePath,
-      newFileName: dto.newFileName,
-      purgeCache:  dto.purgeCache ?? true,
-    });
+      newFileName: `${base}.${ext}`,
+      purgeCache: dto.purgeCache ?? true,
+    })
 
-    // Le fileId ne change pas lors d'un renommage : on relit le
-    // fichier pour renvoyer l'état à jour (nouvelle url, filePath, name).
-    return this.getById(fileId);
+    return this.getById(fileId)
   }
 
   /**

@@ -57,9 +57,8 @@ export class ImageKitController {
     }
   }
 
-
   /**
-   * PATCH /images/:fileId/rename
+   * PATCH /images/:fileId
    * Renomme un fichier. Body : { newFileName, purgeCache? }
    */
   async rename(req: Request, res: Response): Promise<void> {
@@ -79,7 +78,15 @@ export class ImageKitController {
       const file = await imagekitService.rename(String(req.params['fileId']), dto);
       res.json(file);
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Erreur renommage';
+      console.error('rename failed for fileId=', req.params['fileId'], error);
+
+      const message =
+          error instanceof Error
+              ? error.message
+              : typeof error === 'object' && error !== null && 'message' in error
+                  ? String((error as { message: unknown }).message)
+                  : 'Erreur renommage';
+
       res.status(500).json({ error: message });
     }
   }

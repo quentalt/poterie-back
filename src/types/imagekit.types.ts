@@ -23,7 +23,6 @@ export interface ImageKitFile {
   updatedAt: string;
   customMetadata: Record<string, unknown>;
 }
-
 export interface RenameImageDto {
   /** Nouveau nom du fichier (avec extension, ex: "vase-bleu.webp") */
   newFileName: string;
