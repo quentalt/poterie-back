@@ -5,10 +5,14 @@ import type { Request, Response, NextFunction } from 'express';
 export const registerSchema = z.object({
   email: z.string().email('Email invalide'),
   username: z
-    .string()
-    .min(3, 'Le username doit faire au moins 3 caractères')
-    .max(30, 'Le username ne peut pas dépasser 30 caractères')
-    .regex(/^[a-zA-Z0-9_-]+$/, 'Seuls les lettres, chiffres, _ et - sont autorisés'),
+      .string()
+      .min(3, 'Le nom doit faire au moins 3 caractères')
+      .max(30, 'Le nom ne peut pas dépasser 30 caractères')
+      .regex(
+          /^[a-zA-ZÀ-ÿ0-9_ -]+$/,
+          'Seuls les lettres, chiffres, espaces, _ et - sont autorisés'
+      )
+      .transform((v) => v.trim()),
   password: z
     .string()
     .min(8, 'Le mot de passe doit faire au moins 8 caractères')
@@ -50,6 +54,7 @@ export const updateUserSchema = z.object({
     .min(3)
     .max(30)
     .regex(/^[a-zA-Z0-9_-]+$/)
+      .transform((v) => v.trim())
     .optional(),
   password: z.string().min(8).regex(/[A-Z]/).regex(/[0-9]/).optional(),
   role: z.enum(['admin', 'user', 'moderator']).optional(),
