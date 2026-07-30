@@ -48,8 +48,10 @@ export class ImageKitService {
    * Liste les fichiers d'un dossier avec filtres optionnels.
    */
   async list(query: ListFilesQuery = {}): Promise<ImageKitFile[]> {
-    const folderKey: FolderKey = query.folder ?? 'products';
-    const path = FOLDERS[folderKey];
+    const folderKey = query.folder as FolderKey | undefined;
+    const path = folderKey && folderKey in FOLDERS
+        ? FOLDERS[folderKey]
+        : `/${query.folder ?? 'pieces'}`;
 
     const results = await imagekit.listFiles({
       path,
@@ -61,7 +63,7 @@ export class ImageKitService {
           : undefined,
       fileType: 'image',
       sort: 'DESC_CREATED',
-      includeFolder: false,   // ← déjà probablement là
+      includeFolder: false,
     });
 
     return (results as unknown[]).map((f) => this.normalize(f));
