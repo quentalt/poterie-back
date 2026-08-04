@@ -42,23 +42,8 @@ export class ImageKitService {
       },
     };
 
-    const customMetadata: Record<string, string> = {};
-
-    if (dto.title?.trim()) {
-      customMetadata.title = dto.title.trim();
-    }
-    if (dto.status?.trim()) {
-      customMetadata.status = dto.status.trim();
-    }
-    if (dto.category?.trim()) {
-      customMetadata.category = dto.category.trim();
-    }
     if (dto.description?.trim()) {
-      customMetadata.description = dto.description.trim();
-    }
-
-    if (Object.keys(customMetadata).length > 0) {
-      uploadParams.customMetadata = customMetadata;
+      uploadParams.customMetadata = { description: dto.description.trim() };
     }
 
     const result = await imagekit.upload(uploadParams);

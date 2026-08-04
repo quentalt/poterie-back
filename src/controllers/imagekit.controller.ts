@@ -38,11 +38,12 @@ export class ImageKitController {
 
       const body = req.body as Record<string, unknown>;
       const folder = body.folder as UploadImageDto['folder'] | undefined;
-      const tags = typeof body.tags === 'string'
+      const bodyTags = typeof body.tags === 'string'
         ? String(body.tags).split(',').map((t) => t.trim()).filter(Boolean)
-        : [];
+        : Array.isArray(body.tags)
+          ? body.tags.map(String).map((t) => t.trim()).filter(Boolean)
+          : [];
       const useUniqueFileName = body.useUniqueFileName !== 'false';
-      const title = typeof body.title === 'string' ? String(body.title).trim() : undefined;
       const status = typeof body.status === 'string' ? String(body.status).trim() : undefined;
       const category = typeof body.category === 'string' ? String(body.category).trim() : undefined;
 
@@ -64,14 +65,15 @@ export class ImageKitController {
         const baseName = fileNames[index] ?? file.originalname ?? `image-${Date.now()}`;
         const description = descriptions[index] ?? globalDescription;
 
+        const extraTags: string[] = [];
+        if (category) extraTags.push(`category:${category.toLowerCase().replace(/\s+/g, '-')}`);
+        if (status) extraTags.push(`status:${status.toLowerCase().replace(/\s+/g, '-')}`);
+
         const dto: UploadImageDto = {
           fileName: baseName,
           folder: folder ?? 'products',
-          tags,
+          tags: [...bodyTags, ...extraTags],
           useUniqueFileName,
-          title,
-          status,
-          category,
           description,
         };
 

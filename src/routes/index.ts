@@ -2,7 +2,8 @@ import { Router } from 'express';
 import { userController } from '../controllers/user.controller';
 import { authenticate } from '../middleware/auth.middleware';
 import { validate, registerSchema, loginSchema, forgotPasswordSchema, resetPasswordSchema, updateUserSchema } from '../middleware/validation.middleware';
-import imagekitRoutes from "./imagekit.routes";
+import imagekitRoutes from './imagekit.routes';
+import orderRoutes from './order.routes';
 
 const router = Router();
 
@@ -375,6 +376,9 @@ router.patch('/users/:id', authenticate, validate(updateUserSchema), (req, res) 
  *               $ref: '#/components/schemas/Error'
  */
 router.get('/users', authenticate, (req, res) => userController.getAll(req, res));
+
+// ── Commandes ─────────────────────────────────────────────────
+router.use('/orders', orderRoutes);
 
 // ── Images (ImageKit) ──────────────────────────────────────────
 router.use('/images', imagekitRoutes);

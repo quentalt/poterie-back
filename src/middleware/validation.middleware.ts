@@ -63,6 +63,26 @@ export const updateUserSchema = z.object({
   message: 'Au moins un champ doit être fourni',
 });
 
+export const createOrderSchema = z.object({
+  ref: z.string().trim().optional(),
+  client_name: z.string().min(1, 'Le nom du client est requis'),
+  client_email: z.string().email('Email client invalide'),
+  piece: z.string().min(1, 'Le nom de la pièce est requis'),
+  amount: z.number().positive('Le montant doit être positif'),
+  status: z.enum(['pending', 'in_progress', 'delivered', 'cancelled']).optional(),
+});
+
+export const updateOrderSchema = z.object({
+  ref: z.string().trim().optional(),
+  client_name: z.string().min(1).optional(),
+  client_email: z.string().email('Email client invalide').optional(),
+  piece: z.string().min(1).optional(),
+  amount: z.number().positive('Le montant doit être positif').optional(),
+  status: z.enum(['pending', 'in_progress', 'delivered', 'cancelled']).optional(),
+}).refine((data) => Object.keys(data).length > 0, {
+  message: 'Au moins un champ doit être fourni',
+});
+
 // Factory middleware de validation
 export function validate<T>(schema: z.ZodSchema<T>) {
   return (req: Request, res: Response, next: NextFunction): void => {
