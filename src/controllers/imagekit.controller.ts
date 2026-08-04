@@ -42,6 +42,9 @@ export class ImageKitController {
         ? String(body.tags).split(',').map((t) => t.trim()).filter(Boolean)
         : [];
       const useUniqueFileName = body.useUniqueFileName !== 'false';
+      const title = typeof body.title === 'string' ? String(body.title).trim() : undefined;
+      const status = typeof body.status === 'string' ? String(body.status).trim() : undefined;
+      const category = typeof body.category === 'string' ? String(body.category).trim() : undefined;
 
       const fileNames = Array.isArray(body.fileNames)
         ? body.fileNames.map(String)
@@ -66,6 +69,9 @@ export class ImageKitController {
           folder: folder ?? 'products',
           tags,
           useUniqueFileName,
+          title,
+          status,
+          category,
           description,
         };
 

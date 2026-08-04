@@ -5,6 +5,12 @@ export interface UploadImageDto {
   folder?: 'products' | 'collections' | 'atelier';
   /** Tags libres ex: ["bol","grès","collection-2025"] */
   tags?: string[];
+  /** Titre ou nom de la photo */
+  title?: string;
+  /** Catégorie libre */
+  category?: string;
+  /** Statut libre */
+  status?: string;
   /** Description optionnelle associée à l'image */
   description?: string;
   /** Transformer automatiquement (webp, redimensionner…) */
