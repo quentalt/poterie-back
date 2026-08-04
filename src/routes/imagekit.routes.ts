@@ -21,9 +21,9 @@ router.get('/', (req, res) => imagekitController.list(req, res));
 router.use(authenticate);
 
 // ── Upload serveur (admin / modérateur) ───────────────────────
-// POST /images/upload  multipart/form-data  champ: image
+// POST /images/upload  multipart/form-data  champs: images[] ou image
 router.post(
-  '/upload', upload.single('image'),
+  '/upload', upload.any(),
   (req, res) => imagekitController.upload(req, res)
 );
 

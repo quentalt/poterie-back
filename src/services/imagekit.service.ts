@@ -5,6 +5,7 @@ import type {
   ListFilesQuery,
   AuthSignature, RenameImageDto
 } from '../types/imagekit.types';
+import type { UploadOptions } from 'imagekit/dist/libs/interfaces/UploadOptions';
 
 export class ImageKitService {
   /**
@@ -29,7 +30,7 @@ export class ImageKitService {
     const folderKey: FolderKey = dto.folder ?? 'products';
     const folderPath = FOLDERS[folderKey];
 
-    const result = await imagekit.upload({
+    const uploadParams: UploadOptions = {
       file:            fileBuffer,
       fileName:        dto.fileName,
       folder:          folderPath,
@@ -39,7 +40,13 @@ export class ImageKitService {
       transformation: {
         pre: 'w-2000,f-webp,q-85', // max 2000px, converti en WebP
       },
-    });
+    };
+
+    if (dto.description) {
+      uploadParams.customMetadata = { description: dto.description };
+    }
+
+    const result = await imagekit.upload(uploadParams);
 
     return this.normalize(result);
   }

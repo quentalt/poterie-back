@@ -9,6 +9,7 @@ export const upload = multer({
 
   limits: {
     fileSize: MAX_SIZE_MB * 1024 * 1024,
+    files: 20,
   },
 
   fileFilter: (_req: Request, file, cb) => {

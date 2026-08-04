@@ -25,32 +25,59 @@ export class ImageKitController {
    */
   async upload(req: Request, res: Response): Promise<void> {
     try {
-      if (!req.file) {
-        res.status(400).json({ error: 'Aucun fichier reçu (champ : image)' });
+      const files = Array.isArray(req.files)
+        ? req.files
+        : req.file
+          ? [req.file]
+          : [];
+
+      if (files.length === 0) {
+        res.status(400).json({ error: 'Aucun fichier reçu (champ : images ou image)' });
         return;
       }
 
-      const { fileName, folder, tags, useUniqueFileName } = req.body as Record<string, string>;
+      const body = req.body as Record<string, unknown>;
+      const folder = body.folder as UploadImageDto['folder'] | undefined;
+      const tags = typeof body.tags === 'string'
+        ? String(body.tags).split(',').map((t) => t.trim()).filter(Boolean)
+        : [];
+      const useUniqueFileName = body.useUniqueFileName !== 'false';
 
-      if (!fileName) {
-        res.status(400).json({ error: 'Le champ fileName est requis' });
-        return;
-      }
+      const fileNames = Array.isArray(body.fileNames)
+        ? body.fileNames.map(String)
+        : typeof body.fileNames === 'string'
+          ? String(body.fileNames).split(',').map((s) => s.trim())
+          : [];
+      const descriptions = Array.isArray(body.descriptions)
+        ? body.descriptions.map(String)
+        : typeof body.descriptions === 'string'
+          ? String(body.descriptions).split(',').map((s) => s.trim())
+          : [];
+      const globalDescription = typeof body.description === 'string'
+        ? String(body.description).trim()
+        : undefined;
 
-      const dto: UploadImageDto = {
-        fileName,
-        folder: (folder as UploadImageDto['folder']) ?? 'products',
-        tags:   tags ? tags.split(',').map((t) => t.trim()) : [],
-        useUniqueFileName: useUniqueFileName !== 'false',
-      };
+      const uploadPromises = files.map((file, index) => {
+        const baseName = fileNames[index] ?? file.originalname ?? `image-${Date.now()}`;
+        const description = descriptions[index] ?? globalDescription;
 
-      const file = await imagekitService.upload(
-        req.file.buffer,
-        req.file.mimetype,
-        dto
-      );
+        const dto: UploadImageDto = {
+          fileName: baseName,
+          folder: folder ?? 'products',
+          tags,
+          useUniqueFileName,
+          description,
+        };
 
-      res.status(201).json(file);
+        return imagekitService.upload(
+          file.buffer,
+          file.mimetype,
+          dto,
+        );
+      });
+
+      const uploadedFiles = await Promise.all(uploadPromises);
+      res.status(201).json({ files: uploadedFiles });
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Erreur upload';
       res.status(500).json({ error: message });
