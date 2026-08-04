@@ -378,6 +378,189 @@ router.patch('/users/:id', authenticate, validate(updateUserSchema), (req, res) 
 router.get('/users', authenticate, (req, res) => userController.getAll(req, res));
 
 // ── Commandes ─────────────────────────────────────────────────
+/**
+ * @swagger
+ * /api/v1/orders:
+ *   post:
+ *     summary: Créer une commande
+ *     tags: [Orders]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/OrderCreate'
+ *     responses:
+ *       201:
+ *         description: Commande créée avec succès
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Order'
+ *       400:
+ *         description: Données invalides
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       401:
+ *         description: Token manquant ou invalide
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *
+ *   get:
+ *     summary: Lister les commandes
+ *     tags: [Orders]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *         description: Numéro de page
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 10
+ *           maximum: 100
+ *         description: Nombre de résultats par page
+ *     responses:
+ *       200:
+ *         description: Liste paginée des commandes
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Order'
+ *                 total:
+ *                   type: integer
+ *                   example: 0
+ *                 page:
+ *                   type: integer
+ *                   example: 1
+ *                 limit:
+ *                   type: integer
+ *                   example: 10
+ *                 totalPages:
+ *                   type: integer
+ *                   example: 0
+ *       401:
+ *         description: Token manquant ou invalide
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *
+ * /api/v1/orders/{id}:
+ *   get:
+ *     summary: Récupérer une commande par ID
+ *     tags: [Orders]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID de la commande
+ *     responses:
+ *       200:
+ *         description: Détail de la commande
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Order'
+ *       400:
+ *         description: ID invalide
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       404:
+ *         description: Commande introuvable
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *
+ *   patch:
+ *     summary: Mettre à jour une commande
+ *     tags: [Orders]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID de la commande
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/OrderUpdate'
+ *     responses:
+ *       200:
+ *         description: Commande mise à jour
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Order'
+ *       400:
+ *         description: Données invalides
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       404:
+ *         description: Commande introuvable
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *
+ *   delete:
+ *     summary: Supprimer une commande
+ *     tags: [Orders]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID de la commande
+ *     responses:
+ *       204:
+ *         description: Commande supprimée
+ *       400:
+ *         description: ID invalide
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       404:
+ *         description: Commande introuvable
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ */
 router.use('/orders', orderRoutes);
 
 // ── Images (ImageKit) ──────────────────────────────────────────
@@ -439,4 +622,89 @@ export default router;
  *         error:
  *           type: string
  *           example: Email ou mot de passe incorrect
+ *
+ *     Order:
+ *       type: object
+ *       properties:
+ *         id:
+ *           type: integer
+ *           example: 1
+ *         ref:
+ *           type: string
+ *           example: CMD-1680000000000
+ *         client_name:
+ *           type: string
+ *           example: Jojo
+ *         client_email:
+ *           type: string
+ *           format: email
+ *           example: jojo@test.com
+ *         piece:
+ *           type: string
+ *           example: Super vase
+ *         amount:
+ *           type: number
+ *           format: float
+ *           example: 36000
+ *         status:
+ *           type: string
+ *           enum: [pending, in_progress, delivered, cancelled]
+ *           example: in_progress
+ *         created_at:
+ *           type: string
+ *           format: date-time
+ *         updated_at:
+ *           type: string
+ *           format: date-time
+ *
+ *     OrderCreate:
+ *       type: object
+ *       required: [client_name, client_email, piece, amount]
+ *       properties:
+ *         ref:
+ *           type: string
+ *           example: CMD-1680000000000
+ *         client_name:
+ *           type: string
+ *           example: Jojo
+ *         client_email:
+ *           type: string
+ *           format: email
+ *           example: jojo@test.com
+ *         piece:
+ *           type: string
+ *           example: Super vase
+ *         amount:
+ *           type: number
+ *           format: float
+ *           example: 36000
+ *         status:
+ *           type: string
+ *           enum: [pending, in_progress, delivered, cancelled]
+ *           example: in_progress
+ *
+ *     OrderUpdate:
+ *       type: object
+ *       properties:
+ *         ref:
+ *           type: string
+ *           example: CMD-1680000000000
+ *         client_name:
+ *           type: string
+ *           example: Jojo
+ *         client_email:
+ *           type: string
+ *           format: email
+ *           example: jojo@test.com
+ *         piece:
+ *           type: string
+ *           example: Super vase
+ *         amount:
+ *           type: number
+ *           format: float
+ *           example: 36000
+ *         status:
+ *           type: string
+ *           enum: [pending, in_progress, delivered, cancelled]
+ *           example: in_progress
  */
