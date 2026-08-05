@@ -3,7 +3,7 @@ import * as dotenv from 'dotenv';
 
 dotenv.config();
 
-const SMTP_HOST = process.env.SMTP_HOST ?? 'smtp.gmail.com';
+const SMTP_HOST = process.env.SMTP_HOST ?? 'smtp-mail.outlook.com';
 const SMTP_PORT = Number(process.env.SMTP_PORT ?? 587);
 const SMTP_SECURE = process.env.SMTP_SECURE === 'true' || SMTP_PORT === 465;
 const SMTP_USER = process.env.SMTP_USER;

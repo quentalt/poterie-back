@@ -5,7 +5,7 @@ import { resetCodeTemplate, passwordChangedTemplate } from '../config/email.temp
 import { passwordResetRepository } from '../repositories/password-reset.repository';
 import { userRepository } from '../repositories/user.repository';
 
-const GMAIL_USER       = process.env.GMAIL_USER!;
+const MAIL_USER       = process.env.MAIL_USER!;
 const EXPIRES_MINUTES  = 15;
 const MAX_ATTEMPTS     = 5;   // Bloque après 5 essais erronés
 const SALT_ROUNDS      = 12;
@@ -50,7 +50,7 @@ export class PasswordResetService {
     });
 
     await transporter.sendMail({
-      from:    `"User Manager" <${GMAIL_USER}>`,
+      from:    `"User Manager" <${MAIL_USER}>`,
       to:      user.email,
       subject,
       html,
@@ -109,7 +109,7 @@ export class PasswordResetService {
     // Email de confirmation
     const { subject, html, text } = passwordChangedTemplate({ username: user.username });
     await transporter.sendMail({
-      from: `"User Manager" <${GMAIL_USER}>`,
+      from: `"User Manager" <${MAIL_USER}>`,
       to:   user.email,
       subject,
       html,
